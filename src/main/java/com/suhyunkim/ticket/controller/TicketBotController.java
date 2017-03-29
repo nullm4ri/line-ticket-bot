@@ -64,7 +64,7 @@ import lombok.NonNull;
 	private void reply(@NonNull String replyToken, @NonNull List<Message> messages) {
 		try {
 			BotApiResponse apiResponse = lineMessagingClient.replyMessage(new ReplyMessage(replyToken, messages)).get();
-			//			log.info("Sent Sentmessages: {}", apiResponse);
+			//		log.info("Sent Sentmessages: {}", apiResponse);
 		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException(e);
 		}
