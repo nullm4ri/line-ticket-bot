@@ -48,7 +48,8 @@ import lombok.NonNull;
  *
  * @author Suhyun Kim (k.i.m@navercorp.com)
  */
-@LineMessageHandler public class TicketBotController {
+@LineMessageHandler
+public class TicketBotController {
 
 	@Autowired private LineMessagingClient lineMessagingClient;
 
