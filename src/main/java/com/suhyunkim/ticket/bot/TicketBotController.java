@@ -51,12 +51,18 @@ public class TicketBotController {
 	@EventMapping
 	public void handleFollowEvent(FollowEvent event) throws Exception {
 		String followedUserId = event.getSource().getUserId();
-		List<Message> welcomeMessageList = Lists.newArrayList(
-			new TextMessage("너는 " + followedUserId + "구나! 새로운 대기자는 언제나 환영이야!"),
-			new TextMessage("조성진 통영 리사이틀 공연의 빈 자리가 나오면 내가 너에게 알려줄게!"));
-		PushMessage pushMessage = new PushMessage(followedUserId, welcomeMessageList);
-		lineMessagingClient.pushMessage(pushMessage);
+		lineMessagingClient.getProfile(followedUserId).whenComplete((profile, throwable) -> {
+			PushMessage welcomeMessage = getWelcomeMessage(followedUserId, profile.getDisplayName());
+			lineMessagingClient.pushMessage(welcomeMessage);
+		});
 		// TODO #2 save follower id in DB
+	}
+
+	private PushMessage getWelcomeMessage(String userId, String userName) {
+		List<Message> welcomeMessageList = Lists.newArrayList(
+			new TextMessage("너는 " + userName + "이구나! 새로운 대기자는 언제나 환영이야!"),
+			new TextMessage("조성진 통영 리사이틀 공연의 빈 자리가 나오면 내가 너에게 알려줄게!"));
+		return new PushMessage(userId, welcomeMessageList);
 	}
 
 	// TODO #2
