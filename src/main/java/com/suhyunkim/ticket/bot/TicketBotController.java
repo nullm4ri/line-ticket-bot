@@ -8,11 +8,11 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.google.common.collect.Lists;
 import com.linecorp.bot.client.LineMessagingClient;
+import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.action.MessageAction;
-import com.linecorp.bot.model.action.PostbackAction;
-import com.linecorp.bot.model.action.URIAction;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
 import com.linecorp.bot.model.event.MessageEvent;
@@ -21,17 +21,9 @@ import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.event.source.GroupSource;
 import com.linecorp.bot.model.event.source.RoomSource;
 import com.linecorp.bot.model.event.source.Source;
-import com.linecorp.bot.model.message.ImagemapMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
-import com.linecorp.bot.model.message.imagemap.ImagemapArea;
-import com.linecorp.bot.model.message.imagemap.ImagemapBaseSize;
-import com.linecorp.bot.model.message.imagemap.MessageImagemapAction;
-import com.linecorp.bot.model.message.imagemap.URIImagemapAction;
-import com.linecorp.bot.model.message.template.ButtonsTemplate;
-import com.linecorp.bot.model.message.template.CarouselColumn;
-import com.linecorp.bot.model.message.template.CarouselTemplate;
 import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import com.linecorp.bot.model.response.BotApiResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
@@ -56,18 +48,21 @@ public class TicketBotController {
 		handleTextContent(event.getReplyToken(), event, message);
 	}
 
-	// TODO #2
 	@EventMapping
 	public void handleFollowEvent(FollowEvent event) throws Exception {
 		String followedUserId = event.getSource().getUserId();
-
+		List<Message> welcomeMessageList = Lists.newArrayList(
+			new TextMessage("너는 " + followedUserId + "구나! 새로운 대기자는 언제나 환영이야!"),
+			new TextMessage("조성진 통영 리사이틀 공연의 빈 자리가 나오면 내가 너에게 알려줄게!"));
+		PushMessage pushMessage = new PushMessage(followedUserId, welcomeMessageList);
+		lineMessagingClient.pushMessage(pushMessage);
+		// TODO #2 save follower id in DB
 	}
 
 	// TODO #2
 	@EventMapping
 	public void handleUnfollowEvent(UnfollowEvent event) throws Exception {
 		String unfollowedUserId = event.getSource().getUserId();
-
 	}
 
 	private void reply(@NonNull String replyToken, @NonNull Message message) {
@@ -137,42 +132,42 @@ public class TicketBotController {
 				this.reply(replyToken, templateMessage);
 				break;
 			}
-			case "buttons": {
-				String imageUrl = createUri("/static/buttons/1040.jpg");
-				ButtonsTemplate buttonsTemplate = new ButtonsTemplate(imageUrl, "My button sample", "Hello, my button",
-					Arrays.asList(new URIAction("Go to line.me", "https://line.me"),
-						new PostbackAction("Say hello1", "hello こんにちは"),
-						new PostbackAction("言 hello2", "hello こんにちは", "hello こんにちは"),
-						new MessageAction("Say message", "Rice=米")));
-				TemplateMessage templateMessage = new TemplateMessage("Button alt text", buttonsTemplate);
-				this.reply(replyToken, templateMessage);
-				break;
-			}
-			case "carousel": {
-				String imageUrl = createUri("/static/buttons/1040.jpg");
-				CarouselTemplate carouselTemplate = new CarouselTemplate(Arrays.asList(
-					new CarouselColumn(imageUrl, "hoge", "fuga",
-						Arrays.asList(new URIAction("Go to line.me", "https://line.me"),
-							new PostbackAction("Say hello1", "hello こんにちは"))),
-					new CarouselColumn(imageUrl, "hoge", "fuga",
-						Arrays.asList(new PostbackAction("言 hello2", "hello こんにちは", "hello こんにちは"),
-							new MessageAction("Say message", "Rice=米")))));
-				TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
-				this.reply(replyToken, templateMessage);
-				break;
-			}
-			case "imagemap":
-				this.reply(replyToken,
-					new ImagemapMessage(createUri("/static/rich"), "This is alt text", new ImagemapBaseSize(1040, 1040),
-						Arrays.asList(
-							new URIImagemapAction("https://store.line.me/family/manga/en",
-								new ImagemapArea(0, 0, 520, 520)),
-							new URIImagemapAction("https://store.line.me/family/music/en",
-								new ImagemapArea(520, 0, 520, 520)),
-							new URIImagemapAction("https://store.line.me/family/play/en",
-								new ImagemapArea(0, 520, 520, 520)),
-							new MessageImagemapAction("URANAI!", new ImagemapArea(520, 520, 520, 520)))));
-				break;
+			//			case "buttons": {
+			//				String imageUrl = createUri("/static/buttons/1040.jpg");
+			//				ButtonsTemplate buttonsTemplate = new ButtonsTemplate(imageUrl, "My button sample", "Hello, my button",
+			//					Arrays.asList(new URIAction("Go to line.me", "https://line.me"),
+			//						new PostbackAction("Say hello1", "hello こんにちは"),
+			//						new PostbackAction("言 hello2", "hello こんにちは", "hello こんにちは"),
+			//						new MessageAction("Say message", "Rice=米")));
+			//				TemplateMessage templateMessage = new TemplateMessage("Button alt text", buttonsTemplate);
+			//				this.reply(replyToken, templateMessage);
+			//				break;
+			//			}
+			//			case "carousel": {
+			//				String imageUrl = createUri("/static/buttons/1040.jpg");
+			//				CarouselTemplate carouselTemplate = new CarouselTemplate(Arrays.asList(
+			//					new CarouselColumn(imageUrl, "hoge", "fuga",
+			//						Arrays.asList(new URIAction("Go to line.me", "https://line.me"),
+			//							new PostbackAction("Say hello1", "hello こんにちは"))),
+			//					new CarouselColumn(imageUrl, "hoge", "fuga",
+			//						Arrays.asList(new PostbackAction("言 hello2", "hello こんにちは", "hello こんにちは"),
+			//							new MessageAction("Say message", "Rice=米")))));
+			//				TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
+			//				this.reply(replyToken, templateMessage);
+			//				break;
+			//			}
+			//			case "imagemap":
+			//				this.reply(replyToken,
+			//					new ImagemapMessage(createUri("/static/rich"), "This is alt text", new ImagemapBaseSize(1040, 1040),
+			//						Arrays.asList(
+			//							new URIImagemapAction("https://store.line.me/family/manga/en",
+			//								new ImagemapArea(0, 0, 520, 520)),
+			//							new URIImagemapAction("https://store.line.me/family/music/en",
+			//								new ImagemapArea(520, 0, 520, 520)),
+			//							new URIImagemapAction("https://store.line.me/family/play/en",
+			//								new ImagemapArea(0, 520, 520, 520)),
+			//							new MessageImagemapAction("URANAI!", new ImagemapArea(520, 520, 520, 520)))));
+			//				break;
 			default:
 				//				log.info("Returns echo message {}: {}", replyToken, text);
 				this.replyText(replyToken, text);
