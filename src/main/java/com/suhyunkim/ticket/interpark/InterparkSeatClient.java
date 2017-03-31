@@ -2,7 +2,6 @@ package com.suhyunkim.ticket.interpark;
 
 import java.net.URI;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,8 +19,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 @Repository
 public class InterparkSeatClient {
-	@Autowired
-	private RestTemplate restTemplate;
+	//	@Autowired
+	//	private RestTemplate restTemplate;
 
 	// ticket.interpark.com/Ticket/Goods/GoodsInfoJSON.asp?Flag=RemainSeat&GoodsCode=17003607&PlaceCode=14000135&PlaySeq=001&Callback=fnPlaySeqChangeCallBack
 	public String get(String goodsCode, String placeCode) {
@@ -45,6 +44,7 @@ public class InterparkSeatClient {
 		URI uri = UriComponentsBuilder.fromHttpUrl("ticket.interpark.com/Ticket/Goods/GoodsInfoJSON.asp").queryParams(
 			params).build().toUri();
 
+		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, entity, String.class);
 
 		return response.getBody();
