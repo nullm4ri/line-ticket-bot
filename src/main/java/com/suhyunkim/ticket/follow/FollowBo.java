@@ -27,6 +27,8 @@ public class FollowBo {
 
 	public void unfollow(String userId) {
 		Follower follower = followDao.findByUserId(userId);
-		followDao.delete(follower);
+		if (follower != null) {
+			followDao.delete(follower);
+		}
 	}
 }
