@@ -28,6 +28,7 @@ import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import com.linecorp.bot.model.response.BotApiResponse;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
+import com.suhyunkim.ticket.follow.FollowBo;
 
 import lombok.NonNull;
 
@@ -42,6 +43,9 @@ public class TicketBotController {
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
 
+	@Autowired
+	private FollowBo followBo;
+
 	@EventMapping
 	public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) throws Exception {
 		TextMessageContent message = event.getMessage();
@@ -51,11 +55,12 @@ public class TicketBotController {
 	@EventMapping
 	public void handleFollowEvent(FollowEvent event) throws Exception {
 		String followedUserId = event.getSource().getUserId();
+		followBo.follow(followedUserId);
+
 		lineMessagingClient.getProfile(followedUserId).whenComplete((profile, throwable) -> {
 			PushMessage welcomeMessage = getWelcomeMessage(followedUserId, profile.getDisplayName());
 			lineMessagingClient.pushMessage(welcomeMessage);
 		});
-		// TODO #2 save follower id in DB
 	}
 
 	private PushMessage getWelcomeMessage(String userId, String userName) {
@@ -65,10 +70,10 @@ public class TicketBotController {
 		return new PushMessage(userId, welcomeMessageList);
 	}
 
-	// TODO #2
 	@EventMapping
 	public void handleUnfollowEvent(UnfollowEvent event) throws Exception {
 		String unfollowedUserId = event.getSource().getUserId();
+		followBo.unfollow(unfollowedUserId);
 	}
 
 	private void reply(@NonNull String replyToken, @NonNull Message message) {
