@@ -28,6 +28,9 @@ public class Follower {
 	private String userId;
 	private Date followDate;
 
+	protected Follower() {
+	}
+
 	public Follower(String userId, Date followDate) {
 		this.userId = userId;
 		this.followDate = followDate;
